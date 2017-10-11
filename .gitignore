@@ -2,7 +2,7 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/.vs/ProjectSettings.json
+/.vs/
 DiscordBot/.vs/DiscordBot/
 DiscordBot/DiscordBot/obj/
 DiscordBot/DiscordBot/bin/
