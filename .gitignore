@@ -3,3 +3,6 @@
 ################################################################################
 
 /.vs/ProjectSettings.json
+DiscordBot/.vs/DiscordBot/
+DiscordBot/DiscordBot/obj/
+DiscordBot/DiscordBot/bin/
