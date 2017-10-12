@@ -2,12 +2,14 @@
 using Discord.Commands;
 using Discord.WebSocket;
 using System;
+using System.Reflection;
 using System.Threading.Tasks;
 
 namespace DiscordBot
 {
     public class Program
     {
+        // TODO: Do a proper check of command line args, this'll crash hard without it
         public static void Main(string[] args) => new Program().MainAsync(args[0]).GetAwaiter().GetResult();
 
         private DiscordSocketClient _client;
@@ -31,6 +33,8 @@ namespace DiscordBot
         {
             _client.MessageReceived += MessageReceived;
 
+            await _commands.AddModulesAsync(Assembly.GetEntryAssembly());
+
             await _client.LoginAsync(TokenType.Bot, token);
             await _client.StartAsync();
 
@@ -49,21 +53,35 @@ namespace DiscordBot
 
             int pos = 0;
 
-            if (msg.HasCharPrefix('!', ref pos) || msg.HasMentionPrefix(_client.CurrentUser, ref pos))
+            if (msg.HasCharPrefix('!', ref pos))
             {
                 var context = new SocketCommandContext(_client, msg);
-
+                
                 var result = await _commands.ExecuteAsync(context, pos);
 
-                if (message.Content.Substring(pos) == "ping")
+                await Log(new LogMessage(LogSeverity.Info, "Command execution", "Resulting in: " + result.IsSuccess.ToString()));
+
+                if (message.Content.Substring(pos,4) == "ping")
                 {
                     await message.Channel.SendMessageAsync("Pong!");
                     await Log(new LogMessage(LogSeverity.Info, "Message Received - Ping Command", "Ponging channel " + message.Channel.Name));
+                }
+                else if (message.Content.Substring(pos,7) == "command")
+                {
+                    await message.Channel.SendMessageAsync(_commands.Commands.ToString());
+                    await Log(new LogMessage(LogSeverity.Debug, "Message Received", "Printing list of commands"));
                 }
                 else
                 {
                     await Log(new LogMessage(LogSeverity.Debug, "Message Received", "Command not found: " + message.Content.Substring(pos)));
                 }
+            }
+
+            var mentionCount = msg.MentionedUsers.Count;
+
+            if (mentionCount > 0)
+            {
+                await Log(new LogMessage(LogSeverity.Info, "Message Received", "Number of mentions: " + mentionCount));
             }
         }
 
