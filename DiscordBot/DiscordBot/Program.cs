@@ -59,17 +59,18 @@ namespace DiscordBot
                 
                 var result = await _commands.ExecuteAsync(context, pos);
 
-                await Log(new LogMessage(LogSeverity.Info, "Command execution", "Resulting in: " + result.IsSuccess.ToString()));
-
-                if (message.Content.Substring(pos,4) == "ping")
+                if (result.IsSuccess)
                 {
-                    await message.Channel.SendMessageAsync("Pong!");
-                    await Log(new LogMessage(LogSeverity.Info, "Message Received - Ping Command", "Ponging channel " + message.Channel.Name));
+                    return;
                 }
-                else if (message.Content.Substring(pos,7) == "command")
+                
+                if (message.Content.Substring(pos,7) == "command")
                 {
-                    await message.Channel.SendMessageAsync(_commands.Commands.ToString());
                     await Log(new LogMessage(LogSeverity.Debug, "Message Received", "Printing list of commands"));
+                    foreach (var command in _commands.Commands)
+                        {
+                        await message.Channel.SendMessageAsync(command.Name);
+                    }
                 }
                 else
                 {
