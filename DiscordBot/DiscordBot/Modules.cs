@@ -23,30 +23,32 @@ namespace DiscordBot
 
     public class Portal : ModuleBase<SocketCommandContext>
     {
+        private string portalQuoteUrl = "https://theportalwiki.com/wiki/";
+        private string[] quoteUrls = { "Turret_voice_lines", "GLaDOS_voice_lines", "Announcer_voice_lines", "Caroline_voice_lines", "Cave_Johnson_voice_lines", "Core_voice_lines", "Wheatley_voice_lines", "Defective_Turret_voice_lines" };
+        private string[] quoteIdentities = { "Turret", "GlaDOS", "Announcer", "Caroline", "Cave Johnson", "Core", "Wheatley", "Defective_Turret_voice_lines" };
+
         [Command("quote")]
         [Summary("Prints a random Portal quote")]
         [Alias("Quote", "portal", "Portal", "portal2", "Portal2")]
         public async Task Quote()
         {
-            Console.WriteLine("Modules - Portal - Quote - Enter quote");
-            var url = "https://theportalwiki.com/wiki/Turret_voice_lines";
+            var rnd = new Random();
+
+            var identityIndex = rnd.Next(quoteUrls.Length);
+            Console.WriteLine("identityIndex: " + identityIndex);
+            Console.WriteLine("quoteUrls length: " + quoteUrls.Length + " Random Identity number: " + identityIndex);
+            var url = portalQuoteUrl + quoteUrls[identityIndex];
             var web = new HtmlWeb();
-            Console.WriteLine("Modules - Portal - Quote - Load Url");
             var doc = web.Load(url);
 
-            Console.WriteLine("Modules - Portal - Quote - Select Nodes");
-            var nodes = doc.DocumentNode.SelectNodes("//a[@class=\"internal\"]");
+            // This XPath isn't working properly for all of the wiki pages, I'll need to test this out more
+            var quotes = doc.DocumentNode.SelectNodes("//*[@id=\"mw - content - text\"]/ul/li/i | //a[@class=\"internal\" and text() != \"Download\" and text() != \"Play\"]");
+            var quoteIndex = rnd.Next(quotes.Count);
+            Console.WriteLine("quoteIndex: " + quoteIndex);
+            Console.WriteLine("Identity:" + quoteIdentities[identityIndex] + " quotes Count: " + quotes.Count + " Random Quote number: " + quoteIndex);
+            var randomQuote = quotes[quoteIndex].InnerText;
 
-
-            Console.WriteLine("Modules - Portal - Quote - Number of nodes:" + nodes.Count);
-                
-            foreach (var node in nodes)
-            {
-                Console.WriteLine(node.InnerText);
-            }
-                
-
-            await ReplyAsync("Here a quote will be added");
+            await ReplyAsync(quoteIdentities[identityIndex] + ": " + randomQuote);
         }
     }
 }
